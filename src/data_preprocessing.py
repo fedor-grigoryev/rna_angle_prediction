@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset
+from math import isnan
 
 
 def pad_sequences(sequences, maxlen=200, padding_value=0):
@@ -8,32 +9,51 @@ def pad_sequences(sequences, maxlen=200, padding_value=0):
 
 def encode_sequences(sequences, gammas):
     encodings = {
-        "A": 1,
-        "U": 2,
-        "G": 3,
-        "C": 4,
-        # We don't want to have these in the sequences, cause it's RNA
-        "P": -10000,
-        "T": -10000,
+        "A": 0,
+        "U": 1,
+        "G": 2,
+        "C": 3,
     }
 
     encoded_sequences = [[encodings[x.upper()] for x in seq]
                          for seq in sequences]
     encoded_gammas = gammas[:]
-    i = 0
-    while i < len(encoded_sequences):
-        # Remove sequences with negative values
-        if sum(encoded_sequences[i]) < 0:
-            encoded_sequences.pop(i)
-            encoded_gammas.pop(i)
-        i += 1
-
     return encoded_sequences, encoded_gammas
 
 
 def create_mask(sequences, padding_value=-1):
     return [[float(token != padding_value) for token in seq] for seq in sequences]
 # Custom Dataset class
+
+
+def process_data(sequences, gammas, maxlen=200):
+    encoded_sequences, encoded_gammas = encode_sequences(sequences, gammas)
+    padded_sequences = pad_sequences(encoded_sequences, maxlen=maxlen)
+    padded_gammas = pad_sequences(encoded_gammas, maxlen=maxlen)
+    masks = create_mask(padded_sequences)
+
+    # if any gamma is nan remove sequence, gamma and mask
+    i = 0
+    while i < len(padded_gammas):
+        for j in range(len(padded_gammas[i])):
+            if isnan(padded_gammas[i][j]):
+                padded_sequences.pop(i)
+                padded_gammas.pop(i)
+                masks.pop(i)
+        i += 1
+
+    return padded_sequences, padded_gammas, masks
+
+
+def calculate_class_index(angle, num_classes):
+    # Calculate the class index
+    if angle < 0:
+        angle += 360
+    class_index = int(angle // (360/num_classes))
+    # If the angle is exactly 180, we need to subtract 1 from the class index
+    if angle == 180:
+        class_index -= 1
+    return class_index
 
 
 class NucleotideDataset(Dataset):

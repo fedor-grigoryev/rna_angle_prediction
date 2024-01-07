@@ -1,8 +1,20 @@
 import torch
+
+from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from data_preprocessing import NucleotideDataset
 
 
-def evaluate_classifier(model, test_loader, num_classes):
+def evaluate_classifier(model,
+                        num_classes,
+                        padded_sequences_test,
+                        padded_gammas_test,
+                        masks_test):
+
+    test_loader = DataLoader(NucleotideDataset(torch.tensor(padded_sequences_test),
+                                               torch.tensor(
+                                                   padded_gammas_test),
+                                               torch.tensor(masks_test)))
 
     # Variables to track metrics
     accuracies = []
