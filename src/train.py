@@ -9,6 +9,7 @@ from sklearn.utils.class_weight import compute_class_weight
 import matplotlib.pyplot as plt
 from IPython import display
 from data_preprocessing import NucleotideDataset
+from evaluate import evaluate_classifier
 
 
 num_epochs = 25
@@ -76,13 +77,17 @@ def train_regressor(model,
         # display.clear_output(wait=True)
         # display.display(plt.show())
         # display.clear_output(wait=True)
+    return model
 
 
 def train_classifier(model,
                      num_classes,
                      padded_sequences_train,
                      padded_gammas_train,
-                     masks_train):
+                     masks_train,
+                     padded_sequences_test,
+                     padded_gammas_test,
+                     masks_test):
     # Addressing class imbalance
     # Flatten the list of class labels
     all_labels = [
@@ -111,6 +116,7 @@ def train_classifier(model,
     train_losses = []
     for epoch in range(num_epochs):
         model.train()  # Set the model to training mode
+        total_loss = 0
 
         # Training Loop
         for _sequences, _angle_classes, _masks in train_loader:
@@ -140,6 +146,7 @@ def train_classifier(model,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            total_loss += 0 if np.isnan(loss.item()) else loss.item()
 
         # plt.figure(figsize=(10, 6))
         # plt.plot(train_losses, label='Train Loss')
@@ -148,3 +155,11 @@ def train_classifier(model,
         # display.clear_output(wait=True)
         # display.display(plt.show())
         # display.clear_output(wait=True)
+        average_loss = total_loss / len(train_loader)
+        print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {average_loss:.4f}")
+    # Evaluate the model
+    evaluate_classifier(model,
+                        num_classes=num_classes,
+                        padded_sequences_test=padded_sequences_test,
+                        padded_gammas_test=padded_gammas_test,
+                        masks_test=masks_test)

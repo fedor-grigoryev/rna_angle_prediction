@@ -202,5 +202,5 @@ def dssr_outputer(data_path, output_path):
 if __name__ == "__main__":
     args = DSSRWrapper.get_arguments()
     dssr_wrapper = DSSRWrapper(**vars(args))
-    dssr_outputer("data/TrainingSet", "../data/angles/TrainingSet")
-    dssr_outputer("data/TestSet", "../data/angles/TestSet")
+    dssr_outputer("../data/TrainingSet", "../data/angles/TrainingSet")
+    dssr_outputer("../data/TestSet", "../data/angles/TestSet")
