@@ -32,3 +32,4 @@ This repo is a wrapper around skeleton that was provided to us to start.
 ## TO-DO
 
 - Include python requirements to run your code with good library versions.
+- Compare our results with results from SPOT-RNA-1D
