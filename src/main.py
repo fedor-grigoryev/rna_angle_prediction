@@ -34,39 +34,45 @@ if __name__ == "__main__":
 
     # REGRESSION APPROACH
     # print("REGRESSION APPROACH")
-    # model = LSTMRegressor(num_embeddings=4, embedding_dim=10, hidden_dim=50)
+    # Regressor = LSTMRegressor(num_embeddings=4, embedding_dim=10, hidden_dim=50)
 
-    # train_regressor(model,
+    # train_regressor(Regressor,
     #                 padded_sequences_train,
     #                 padded_gammas_train,
     #                 masks_train)
 
     # BINARY CLASSIFICATION APPROACH
     print("BINARY CLASSIFICATION APPROACH")
-    model = LSTMClassifier(
+
+    BinClassifier = LSTMClassifier(
         num_embeddings=4, embedding_dim=10, hidden_dim=50, num_classes=2)
 
-    train_classifier(model,
+    train_classifier(BinClassifier,
                      num_classes=2,
                      padded_sequences_train=padded_sequences_train,
                      padded_gammas_train=padded_gammas_bin_classes_train,
                      masks_train=masks_train,
-                     padded_sequences_test=padded_sequences_test,
-                     padded_gammas_test=padded_gammas_bin_classes_test,
-                     masks_test=masks_test
                      )
 
+    evaluate_classifier(BinClassifier,
+                        num_classes=2,
+                        padded_sequences_test=padded_sequences_test,
+                        padded_gammas_test=padded_gammas_bin_classes_test,
+                        masks_test=masks_test)
     # MULTI-CLASS CLASSIFICATION APPROACH
     print("MULTI-CLASS CLASSIFICATION APPROACH")
-    model = LSTMClassifier(
+    MultiClassifier = LSTMClassifier(
         num_embeddings=4, embedding_dim=10, hidden_dim=50, num_classes=20)
 
-    train_classifier(model,
+    train_classifier(MultiClassifier,
                      num_classes=20,
                      padded_sequences_train=padded_sequences_train,
                      padded_gammas_train=padded_gammas_multi_classes_train,
                      masks_train=masks_train,
-                     padded_sequences_test=padded_sequences_test,
-                     padded_gammas_test=padded_gammas_multi_classes_test,
-                     masks_test=masks_test
                      )
+
+    evaluate_classifier(MultiClassifier,
+                        num_classes=20,
+                        padded_sequences_test=padded_sequences_test,
+                        padded_gammas_test=padded_gammas_multi_classes_test,
+                        masks_test=masks_test)

@@ -9,10 +9,9 @@ from sklearn.utils.class_weight import compute_class_weight
 import matplotlib.pyplot as plt
 from IPython import display
 from data_preprocessing import NucleotideDataset
-from evaluate import evaluate_classifier
 
 
-num_epochs = 25
+num_epochs = 45
 
 
 def custom_mae_loss(output, target, mask):
@@ -80,14 +79,13 @@ def train_regressor(model,
     return model
 
 
-def train_classifier(model,
-                     num_classes,
-                     padded_sequences_train,
-                     padded_gammas_train,
-                     masks_train,
-                     padded_sequences_test,
-                     padded_gammas_test,
-                     masks_test):
+def train_classifier(
+        model,
+        num_classes,
+        padded_sequences_train,
+        padded_gammas_train,
+        masks_train):
+
     # Addressing class imbalance
     # Flatten the list of class labels
     all_labels = [
@@ -97,10 +95,6 @@ def train_classifier(model,
     class_weights = compute_class_weight(
         class_weight='balanced', classes=np.unique(all_labels), y=all_labels)
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
-
-    # If you're using a GPU, send the weights to the same device as your model
-    if torch.cuda.is_available():
-        class_weights_tensor = class_weights_tensor.to('cuda')
 
     # DataLoader
     train_loader = DataLoader(NucleotideDataset(torch.tensor(padded_sequences_train),
@@ -157,9 +151,3 @@ def train_classifier(model,
         # display.clear_output(wait=True)
         average_loss = total_loss / len(train_loader)
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {average_loss:.4f}")
-    # Evaluate the model
-    evaluate_classifier(model,
-                        num_classes=num_classes,
-                        padded_sequences_test=padded_sequences_test,
-                        padded_gammas_test=padded_gammas_test,
-                        masks_test=masks_test)
