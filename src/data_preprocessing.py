@@ -9,10 +9,10 @@ def pad_sequences(sequences, maxlen=200, padding_value=0):
 
 def encode_sequences(sequences, gammas):
     encodings = {
-        "A": 0,
-        "U": 1,
-        "G": 2,
-        "C": 3,
+        "A": 1,
+        "U": 2,
+        "G": 3,
+        "C": 4,
     }
 
     encoded_sequences = [[encodings[x.upper()] for x in seq]
@@ -21,7 +21,27 @@ def encode_sequences(sequences, gammas):
     return encoded_sequences, encoded_gammas
 
 
-def create_mask(sequences, padding_value=-1):
+def decode_sequences(sequences, masks):
+    decodings = {
+        1: "A",
+        2: "U",
+        3: "G",
+        4: "C",
+    }
+
+    decoded_sequences = sequences.tolist()
+
+    # Remove padding
+    for i in range(len(decoded_sequences)):
+        decoded_sequences[i] = decoded_sequences[i][:int(sum(masks[i]))]
+
+    decoded_sequences = [[decodings[x] for x in seq]
+                         for seq in decoded_sequences]
+
+    return ["".join(x) for x in decoded_sequences]
+
+
+def create_mask(sequences, padding_value=0):
     return [[float(token != padding_value) for token in seq] for seq in sequences]
 # Custom Dataset class
 
@@ -41,7 +61,6 @@ def process_data(sequences, gammas, maxlen=200):
                 padded_gammas.pop(i)
                 masks.pop(i)
         i += 1
-
     return padded_sequences, padded_gammas, masks
 
 
@@ -54,6 +73,11 @@ def calculate_class_index(angle, num_classes):
     if angle == 180:
         class_index -= 1
     return class_index
+
+
+def convert_classes_to_angles(classes, num_classes):
+    # Convert the classes the average angle in range
+    return [class_index * 360/num_classes + 360/num_classes/2 for class_index in classes]
 
 
 class NucleotideDataset(Dataset):
