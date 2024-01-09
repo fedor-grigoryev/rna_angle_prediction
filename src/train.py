@@ -3,7 +3,6 @@ import torch.optim as optim
 import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
-from math import isnan
 from sklearn.utils.class_weight import compute_class_weight
 
 import matplotlib.pyplot as plt
@@ -11,7 +10,7 @@ from IPython import display
 from utils import NucleotideDataset
 
 
-num_epochs = 45
+num_epochs = 25
 
 
 def custom_mae_loss(output, target, mask):
