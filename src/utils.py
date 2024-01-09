@@ -2,17 +2,12 @@ from torch.utils.data import Dataset
 from math import isnan
 
 
-def pad_sequences(sequences, maxlen=200, padding_value=0):
-    # Pad and/or truncate the sequences
-    return [list(seq) + [padding_value] * (maxlen - len(seq)) if len(seq) < maxlen else seq[:maxlen] for seq in sequences]
-
-
 def encode_sequences(sequences, gammas):
     encodings = {
-        "A": 1,
-        "U": 2,
-        "G": 3,
-        "C": 4,
+        "A": 0,
+        "U": 1,
+        "G": 2,
+        "C": 3,
     }
 
     encoded_sequences = [[encodings[x.upper()] for x in seq]
@@ -21,20 +16,15 @@ def encode_sequences(sequences, gammas):
     return encoded_sequences, encoded_gammas
 
 
-def decode_sequences(sequences, masks=None):
+def decode_sequences(sequences):
     decodings = {
-        1: "A",
-        2: "U",
-        3: "G",
-        4: "C",
+        0: "A",
+        1: "U",
+        2: "G",
+        3: "C",
     }
 
     decoded_sequences = sequences.tolist()
-
-    # Remove padding
-    if masks is not None:
-        for i in range(len(decoded_sequences)):
-            decoded_sequences[i] = decoded_sequences[i][:int(sum(masks[i]))]
 
     decoded_sequences = [[decodings[x] for x in seq]
                          for seq in decoded_sequences]
@@ -47,22 +37,18 @@ def create_mask(sequences, padding_value=0):
 # Custom Dataset class
 
 
-def process_data(sequences, gammas, maxlen=200):
+def process_data(sequences, gammas):
     encoded_sequences, encoded_gammas = encode_sequences(sequences, gammas)
-    padded_sequences = pad_sequences(encoded_sequences, maxlen=maxlen)
-    padded_gammas = pad_sequences(encoded_gammas, maxlen=maxlen)
-    masks = create_mask(padded_sequences)
-
     # if any gamma is nan remove sequence, gamma and mask
     i = 0
-    while i < len(padded_gammas):
-        for j in range(len(padded_gammas[i])):
-            if isnan(padded_gammas[i][j]):
-                padded_sequences.pop(i)
-                padded_gammas.pop(i)
-                masks.pop(i)
+    while i < len(encoded_gammas):
+        for j in range(len(encoded_gammas[i])):
+            if isnan(encoded_gammas[i][j]):
+                encoded_sequences.pop(i)
+                encoded_gammas.pop(i)
+
         i += 1
-    return padded_sequences, padded_gammas, masks
+    return encoded_sequences, encoded_gammas
 
 
 def calculate_class_index(angle, num_classes):
@@ -82,13 +68,12 @@ def convert_classes_to_angles(classes, num_classes):
 
 
 class NucleotideDataset(Dataset):
-    def __init__(self, _sequences, _angles, _masks):
+    def __init__(self, _sequences, _angles):
         self._sequences = _sequences
         self._angles = _angles
-        self._masks = _masks
 
     def __getitem__(self, idx):
-        return self._sequences[idx], self._angles[idx], self._masks[idx]
+        return self._sequences[idx], self._angles[idx]
 
     def __len__(self):
         return len(self._sequences)

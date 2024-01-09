@@ -14,31 +14,28 @@ from utils import NucleotideDataset
 num_epochs = 45
 
 
-def custom_mae_loss(output, target, mask):
+def custom_mae_loss(output, target):
     # Calculate the absolute difference
     abs_diff = torch.abs(output - target)
 
     # Calculate the custom MAE
     custom_mae = torch.min(abs_diff, 360 - abs_diff)
 
-    # Apply the mask to ignore padded values
-    masked_mae = custom_mae * mask  # sometimes returns nans - not sure why
-
-    # Calculate the mean, considering only the non-zero (non-padded) elements
-    loss = torch.sum(masked_mae) / torch.sum(mask)
+    # Calculate the mean
+    loss = custom_mae.mean()
     return loss
 
 
 def train_regressor(model,
-                    padded_sequences_train,
-                    padded_gammas_train,
-                    masks_train,
+                    sequences_train,
+                    gammas_train,
                     ):
 
-    train_loader = DataLoader(NucleotideDataset(torch.tensor(padded_sequences_train),
+    torch.tensor(sequences_train)
+
+    train_loader = DataLoader(NucleotideDataset(torch.tensor(sequences_train),
                                                 torch.tensor(
-                                                    padded_gammas_train),
-                                                torch.tensor(masks_train)),
+                                                    gammas_train)),
                               batch_size=32,
                               shuffle=True)
 
@@ -50,14 +47,13 @@ def train_regressor(model,
         model.train()  # Set the model to training mode
         total_loss = 0
 
-        for _sequences, _angles, _masks in train_loader:
+        for _sequences, _angles in train_loader:
             # Forward pass
             outputs = model(_sequences)
 
-            # Make sure outputs, angles, and masks are of the same shape
             outputs = outputs.squeeze()  # Adjust dimensions if necessary
             # Calculate custom loss
-            loss = custom_mae_loss(outputs, _angles, _masks)
+            loss = custom_mae_loss(outputs, _angles)
 
             train_losses.append(loss.item())
             # Backward and optimize
@@ -82,14 +78,13 @@ def train_regressor(model,
 def train_classifier(
         model,
         num_classes,
-        padded_sequences_train,
-        padded_gammas_train,
-        masks_train):
+        sequences_train,
+        gammas_train):
 
     # Addressing class imbalance
     # Flatten the list of class labels
     all_labels = [
-        label for seq in padded_gammas_train for label in seq]
+        label for seq in gammas_train for label in seq]
 
     # Compute class weights
     class_weights = compute_class_weight(
@@ -97,10 +92,9 @@ def train_classifier(
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
 
     # DataLoader
-    train_loader = DataLoader(NucleotideDataset(torch.tensor(padded_sequences_train),
+    train_loader = DataLoader(NucleotideDataset(torch.tensor(sequences_train),
                                                 torch.tensor(
-                                                    padded_gammas_train),
-                                                torch.tensor(masks_train)),
+                                                    gammas_train)),
                               batch_size=32,
                               shuffle=True)
 
@@ -113,7 +107,7 @@ def train_classifier(
         total_loss = 0
 
         # Training Loop
-        for _sequences, _angle_classes, _masks in train_loader:
+        for _sequences, _angle_classes in train_loader:
             # Outputs shape: [batch_size, sequence_length, num_classes]
             outputs = model(_sequences)
 
@@ -126,14 +120,7 @@ def train_classifier(
             # Convert angle_classes to long type
             _angle_classes = _angle_classes.long()
 
-            # Apply mask to ignore the padded positions
-            # Flatten the mask and use it to select the non-padded positions
-            mask_flat = _masks.view(-1).bool()
-            outputs_masked = outputs[mask_flat]
-
-            angle_classes_masked = _angle_classes[mask_flat]
-
-            loss = criterion(outputs_masked, angle_classes_masked)
+            loss = criterion(outputs, _angle_classes)
             train_losses.append(loss.item())
 
             # Backward and optimize

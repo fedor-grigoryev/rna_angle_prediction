@@ -3,7 +3,7 @@ import torch
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from utils import NucleotideDataset, decode_sequences
-from utils import pad_sequences, encode_sequences
+from utils import encode_sequences
 
 import json
 
@@ -23,14 +23,13 @@ def predict_angles(model,
 
 def evaluate_classifier(model,
                         num_classes,
-                        padded_sequences_test,
-                        padded_gammas_test,
-                        masks_test):
+                        sequences_test,
+                        gammas_test,
+                        ):
 
-    test_loader = DataLoader(NucleotideDataset(torch.tensor(padded_sequences_test),
+    test_loader = DataLoader(NucleotideDataset(torch.tensor(sequences_test),
                                                torch.tensor(
-                                                   padded_gammas_test),
-                                               torch.tensor(masks_test)))
+                                                   gammas_test)))
 
     # Variables to track metrics
     accuracies = []
@@ -40,7 +39,7 @@ def evaluate_classifier(model,
 
     model.eval()  # Set the model to evaluation mode
     with torch.no_grad():  # Disable gradient tracking
-        for _sequences, _angle_classes, _masks in test_loader:
+        for _sequences, _angle_classes in test_loader:
             outputs = model(_sequences)  # Get model predictions
 
             # Reshape outputs for evaluation
@@ -48,23 +47,18 @@ def evaluate_classifier(model,
             outputs = outputs.view(-1, num_classes)
             # Shape: [batch_size * sequence_length]
             _angle_classes = _angle_classes.view(-1)
-            mask_flat = _masks.view(-1).bool()
-
-            # Mask outputs and angle_classes
-            outputs_masked = outputs[mask_flat]
-            angle_classes_masked = _angle_classes[mask_flat]
 
             # Convert model outputs to class predictions
-            predictions = torch.argmax(outputs_masked, dim=1)
+            predictions = torch.argmax(outputs, dim=1)
 
             # Calculate metrics
             accuracies.append(accuracy_score(
-                angle_classes_masked.cpu(), predictions.cpu()))
-            precisions.append(precision_score(angle_classes_masked.cpu(
+                _angle_classes.cpu(), predictions.cpu()))
+            precisions.append(precision_score(_angle_classes.cpu(
             ), predictions.cpu(), average='weighted', zero_division=0))
-            recalls.append(recall_score(angle_classes_masked.cpu(),
+            recalls.append(recall_score(_angle_classes.cpu(),
                                         predictions.cpu(), average='weighted', zero_division=0))
-            f1s.append(f1_score(angle_classes_masked.cpu(),
+            f1s.append(f1_score(_angle_classes.cpu(),
                                 predictions.cpu(), average='weighted', zero_division=0))
 
     # Average the metrics over all batches
@@ -81,18 +75,14 @@ def evaluate_classifier(model,
 
 def compare_spot_rna_1d_regressor(model,
                                   spot_rna_gammas_train,
-                                  padded_sequences_train,
-                                  masks_train,
+                                  sequences_train,
                                   spot_rna_gammas_test,
-                                  padded_sequences_test,
-                                  masks_test,
+                                  sequences_test,
                                   ):
     model.eval()
-    sequences_train = torch.tensor(padded_sequences_train)
-    masks_train = torch.tensor(masks_train)
+    sequences_train = torch.tensor(sequences_train)
 
-    sequences_test = torch.tensor(padded_sequences_test)
-    masks_test = torch.tensor(masks_test)
+    sequences_test = torch.tensor(sequences_test)
 
     model_gammas_train = {}
     model_gammas_test = {}
@@ -101,33 +91,30 @@ def compare_spot_rna_1d_regressor(model,
     mae_test = {}
 
     decoded_sequences_train = decode_sequences(
-        sequences_train, masks_train)
-    decoded_sequences_test = decode_sequences(sequences_test, masks_test)
+        sequences_train)
+    decoded_sequences_test = decode_sequences(sequences_test)
 
     with torch.no_grad():
         output_train = model(sequences_train)
         for i in range(len(decoded_sequences_train)):
             model_gammas_train[decoded_sequences_train[i]
-                               ] = output_train[i][:int(sum(masks_train[i]))]
-
+                               ] = output_train[i]
         output_test = model(sequences_test)
         for i in range(len(decoded_sequences_test)):
             model_gammas_test[decoded_sequences_test[i]
-                              ] = output_test[i][:int(sum(masks_test[i]))]
+                              ] = output_test[i]
 
     for seq in spot_rna_gammas_train.keys():
-        shinked_seq = seq[:200]
-        if shinked_seq in model_gammas_train.keys():
+        if seq in model_gammas_train.keys():
             abs_diff = torch.abs(
-                model_gammas_train[shinked_seq] - torch.tensor(spot_rna_gammas_train[seq][:200]))
+                model_gammas_train[seq] - torch.tensor(spot_rna_gammas_train[seq]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_train[seq] = mae.mean().item()
 
     for seq in spot_rna_gammas_test.keys():
-        shinked_seq = seq[:200]
-        if shinked_seq in model_gammas_test.keys():
+        if seq in model_gammas_test.keys():
             abs_diff = torch.abs(
-                model_gammas_test[shinked_seq] - torch.tensor(spot_rna_gammas_test[seq][:200]))
+                model_gammas_test[seq] - torch.tensor(spot_rna_gammas_test[seq]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_test[seq] = mae.mean().item()
 
