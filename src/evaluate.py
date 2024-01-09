@@ -2,9 +2,23 @@ import torch
 
 from torch.utils.data import DataLoader
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from data_preprocessing import NucleotideDataset, decode_sequences
+from utils import NucleotideDataset, decode_sequences
+from utils import pad_sequences, encode_sequences
 
 import json
+
+
+def predict_angles(model,
+                   sequences,):
+    sequences, _ = encode_sequences(sequences, [])
+
+    with torch.no_grad():
+        model.eval()
+        sequences = torch.tensor(sequences)
+
+        output_predictions = model(sequences)
+
+        return output_predictions
 
 
 def evaluate_classifier(model,

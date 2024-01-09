@@ -21,7 +21,7 @@ def encode_sequences(sequences, gammas):
     return encoded_sequences, encoded_gammas
 
 
-def decode_sequences(sequences, masks):
+def decode_sequences(sequences, masks=None):
     decodings = {
         1: "A",
         2: "U",
@@ -32,8 +32,9 @@ def decode_sequences(sequences, masks):
     decoded_sequences = sequences.tolist()
 
     # Remove padding
-    for i in range(len(decoded_sequences)):
-        decoded_sequences[i] = decoded_sequences[i][:int(sum(masks[i]))]
+    if masks is not None:
+        for i in range(len(decoded_sequences)):
+            decoded_sequences[i] = decoded_sequences[i][:int(sum(masks[i]))]
 
     decoded_sequences = [[decodings[x] for x in seq]
                          for seq in decoded_sequences]

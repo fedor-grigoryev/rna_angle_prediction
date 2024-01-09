@@ -1,13 +1,13 @@
 from visualisation import visualise_distr
 from data_extraction import train_test_extraction
-from data_preprocessing import process_data
+from utils import process_data
 import torch
 import torch.optim as optim
 import json
 
 
 from models import LSTMRegressor, LSTMClassifier
-from data_preprocessing import calculate_class_index
+from utils import calculate_class_index
 from train import train_regressor, train_classifier
 from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor
 
@@ -120,15 +120,15 @@ if __name__ == "__main__":
                              ['sequence']] = spot_rna_angles_test[key]['angles']['gamma']
 
     # # REGRESSION APPROACH
-    # print("REGRESSION APPROACH")
-    # Regressor = torch.load("../models/Regressor.pt")
-    # compare_spot_rna_1d_regressor(Regressor,
-    #                               spot_rna_gammas_train,
-    #                               padded_sequences_train,
-    #                               masks_train,
-    #                               spot_rna_gammas_test,
-    #                               padded_sequences_test,
-    #                               masks_test)
+    print("REGRESSION APPROACH")
+    Regressor = torch.load("../models/Regressor.pt")
+    compare_spot_rna_1d_regressor(Regressor,
+                                  spot_rna_gammas_train,
+                                  padded_sequences_train,
+                                  masks_train,
+                                  spot_rna_gammas_test,
+                                  padded_sequences_test,
+                                  masks_test)
 
     # # BINARY CLASSIFICATION APPROACH
     # print("BINARY CLASSIFICATION APPROACH")

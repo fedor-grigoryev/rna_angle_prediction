@@ -8,7 +8,7 @@ from sklearn.utils.class_weight import compute_class_weight
 
 import matplotlib.pyplot as plt
 from IPython import display
-from data_preprocessing import NucleotideDataset
+from utils import NucleotideDataset
 
 
 num_epochs = 45
