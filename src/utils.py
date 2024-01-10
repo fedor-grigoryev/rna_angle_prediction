@@ -2,17 +2,25 @@ from torch.utils.data import Dataset
 from math import isnan
 
 
-def pad_sequences(sequences, maxlen=200, padding_value=0):
+def pad_sequences(sequences, gammas, maxlen=200, padding_value=0):
+    # We put poly-A tail in the end, but it doesn't matter since it's masked :P
     # Pad and/or truncate the sequences
-    return [list(seq) + [padding_value] * (maxlen - len(seq)) if len(seq) < maxlen else seq[:maxlen] for seq in sequences]
+    padded_seqs = [list(seq) + [padding_value] * (maxlen - len(seq))
+                   if len(seq) < maxlen else seq[:maxlen] for seq in sequences]
+    padded_gammas = [list(gamma) + [padding_value] * (maxlen - len(gamma))
+                     if len(gamma) < maxlen else gamma[:maxlen] for gamma in gammas]
+    masks = [[1] * len(seq) + [0] * (maxlen - len(seq))
+             if len(seq) < maxlen else [1] * maxlen for seq in sequences]
+
+    return padded_seqs, padded_gammas, masks
 
 
 def encode_sequences(sequences, gammas):
     encodings = {
-        "A": 1,
-        "U": 2,
-        "G": 3,
-        "C": 4,
+        "A": 0,
+        "U": 1,
+        "G": 2,
+        "C": 3,
     }
 
     encoded_sequences = [[encodings[x.upper()] for x in seq]
@@ -23,10 +31,10 @@ def encode_sequences(sequences, gammas):
 
 def decode_sequences(sequences, masks=None):
     decodings = {
-        1: "A",
-        2: "U",
-        3: "G",
-        4: "C",
+        0: "A",
+        1: "U",
+        2: "G",
+        3: "C",
     }
 
     decoded_sequences = sequences.tolist()
@@ -34,6 +42,7 @@ def decode_sequences(sequences, masks=None):
     # Remove padding
     if masks is not None:
         for i in range(len(decoded_sequences)):
+            print(len(decoded_sequences[i]), int(sum(masks[i])))
             decoded_sequences[i] = decoded_sequences[i][:int(sum(masks[i]))]
 
     decoded_sequences = [[decodings[x] for x in seq]
@@ -42,16 +51,10 @@ def decode_sequences(sequences, masks=None):
     return ["".join(x) for x in decoded_sequences]
 
 
-def create_mask(sequences, padding_value=0):
-    return [[float(token != padding_value) for token in seq] for seq in sequences]
-# Custom Dataset class
-
-
 def process_data(sequences, gammas, maxlen=200):
     encoded_sequences, encoded_gammas = encode_sequences(sequences, gammas)
-    padded_sequences = pad_sequences(encoded_sequences, maxlen=maxlen)
-    padded_gammas = pad_sequences(encoded_gammas, maxlen=maxlen)
-    masks = create_mask(padded_sequences)
+    padded_sequences, padded_gammas, masks = pad_sequences(
+        encoded_sequences, encoded_gammas, maxlen=maxlen)
 
     # if any gamma is nan remove sequence, gamma and mask
     i = 0

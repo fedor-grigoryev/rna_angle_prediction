@@ -11,7 +11,7 @@ def predict_angles(model,
                    sequences,
                    num_classes=None):
     sequences, _ = encode_sequences(sequences, [])
-    padded_sequences = pad_sequences(sequences, maxlen=200)
+    padded_sequences, _, _ = pad_sequences(sequences, sequences, maxlen=200)
 
     with torch.no_grad():
         model.eval()
