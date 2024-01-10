@@ -39,63 +39,63 @@ if __name__ == "__main__":
         [calculate_class_index(x, num_classes=30) for x in seq] for seq in padded_gammas_test]
 
 # ------------------ TRAINING AND SAVING MODELS --------------------------------
-    # # REGRESSION APPROACH
-    # print("REGRESSION APPROACH")
-    # Regressor = LSTMRegressor(
-    #     num_embeddings=4, embedding_dim=8, hidden_dim=30)
+    # REGRESSION APPROACH
+    print("REGRESSION APPROACH")
+    Regressor = LSTMRegressor(
+        num_embeddings=4, embedding_dim=8, hidden_dim=15)
 
-    # train_regressor(Regressor,
-    #                 padded_sequences_train,
-    #                 padded_gammas_train,
-    #                 masks_train)
-    # # Save the model
-    # torch.save(Regressor, "../models/Regressor.pt")
+    train_regressor(Regressor,
+                    padded_sequences_train,
+                    padded_gammas_train,
+                    masks_train)
+    # Save the model
+    torch.save(Regressor, "../models/Regressor.pt")
 
-    # # BINARY CLASSIFICATION APPROACH
-    # print("BINARY CLASSIFICATION APPROACH")
+    # BINARY CLASSIFICATION APPROACH
+    print("BINARY CLASSIFICATION APPROACH")
 
-    # BinClassifier = LSTMClassifier(
-    #     num_embeddings=4, embedding_dim=8, hidden_dim=30, num_classes=2)
+    BinClassifier = LSTMClassifier(
+        num_embeddings=4, embedding_dim=4, hidden_dim=4, num_classes=2)
 
-    # train_classifier(BinClassifier,
-    #                  num_classes=2,
-    #                  padded_sequences_train=padded_sequences_train,
-    #                  padded_gammas_train=padded_gammas_bin_classes_train,
-    #                  masks_train=masks_train,
-    #                  )
+    train_classifier(BinClassifier,
+                     num_classes=2,
+                     padded_sequences_train=padded_sequences_train,
+                     padded_gammas_train=padded_gammas_bin_classes_train,
+                     masks_train=masks_train,
+                     )
 
-    # # Save the model
-    # torch.save(BinClassifier, "../models/BinClassifier.pt")
+    # Save the model
+    torch.save(BinClassifier, "../models/BinClassifier.pt")
 
-    # # MULTI-CLASS CLASSIFICATION APPROACH
-    # # 20 Classes
-    # print("20 CLASSES CLASSIFICATION APPROACH")
-    # TwentyClassifier = LSTMClassifier(
-    #     num_embeddings=4, embedding_dim=8, hidden_dim=30, num_classes=20)
+    # MULTI-CLASS CLASSIFICATION APPROACH
+    # 20 Classes
+    print("20 CLASSES CLASSIFICATION APPROACH")
+    TwentyClassifier = LSTMClassifier(
+        num_embeddings=4, embedding_dim=8, hidden_dim=15, num_classes=20)
 
-    # train_classifier(TwentyClassifier,
-    #                  num_classes=20,
-    #                  padded_sequences_train=padded_sequences_train,
-    #                  padded_gammas_train=padded_gammas_20_classes_train,
-    #                  masks_train=masks_train,
-    #                  )
+    train_classifier(TwentyClassifier,
+                     num_classes=20,
+                     padded_sequences_train=padded_sequences_train,
+                     padded_gammas_train=padded_gammas_20_classes_train,
+                     masks_train=masks_train,
+                     )
 
-    # # Save the model
-    # torch.save(TwentyClassifier, "../models/TwentyClassifier.pt")
+    # Save the model
+    torch.save(TwentyClassifier, "../models/TwentyClassifier.pt")
 
-    # print("30 CLASSES CLASSIFICATION APPROACH")
-    # ThirtyClassifier = LSTMClassifier(
-    #     num_embeddings=5, embedding_dim=8, hidden_dim=30, num_classes=30)
+    print("30 CLASSES CLASSIFICATION APPROACH")
+    ThirtyClassifier = LSTMClassifier(
+        num_embeddings=5, embedding_dim=8, hidden_dim=15, num_classes=30)
 
-    # train_classifier(ThirtyClassifier,
-    #                  num_classes=30,
-    #                  padded_sequences_train=padded_sequences_train,
-    #                  padded_gammas_train=padded_gammas_30_classes_train,
-    #                  masks_train=masks_train,
-    #                  )
+    train_classifier(ThirtyClassifier,
+                     num_classes=30,
+                     padded_sequences_train=padded_sequences_train,
+                     padded_gammas_train=padded_gammas_30_classes_train,
+                     masks_train=masks_train,
+                     )
 
-    # # Save the model
-    # torch.save(ThirtyClassifier, "../models/ThirtyClassifier.pt")
+    # Save the model
+    torch.save(ThirtyClassifier, "../models/ThirtyClassifier.pt")
 
 # ------------------ LOADING MODELS AND EVALUATING -----------------------------
 

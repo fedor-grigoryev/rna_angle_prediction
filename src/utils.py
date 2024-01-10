@@ -42,7 +42,6 @@ def decode_sequences(sequences, masks=None):
     # Remove padding
     if masks is not None:
         for i in range(len(decoded_sequences)):
-            print(len(decoded_sequences[i]), int(sum(masks[i])))
             decoded_sequences[i] = decoded_sequences[i][:int(sum(masks[i]))]
 
     decoded_sequences = [[decodings[x] for x in seq]

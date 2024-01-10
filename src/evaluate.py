@@ -67,11 +67,11 @@ def evaluate_classifier(model,
             accuracies.append(accuracy_score(
                 angle_classes_masked.cpu(), predictions.cpu()))
             precisions.append(precision_score(angle_classes_masked.cpu(
-            ), predictions.cpu(), average='weighted', zero_division=0))
+            ), predictions.cpu(), average='micro', zero_division=0))
             recalls.append(recall_score(angle_classes_masked.cpu(),
-                                        predictions.cpu(), average='weighted', zero_division=0))
+                                        predictions.cpu(), average='micro', zero_division=0))
             f1s.append(f1_score(angle_classes_masked.cpu(),
-                                predictions.cpu(), average='weighted', zero_division=0))
+                                predictions.cpu(), average='micro', zero_division=0))
 
     # Average the metrics over all batches
     average_accuracy = sum(accuracies) / len(accuracies)

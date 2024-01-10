@@ -6,8 +6,9 @@ class LSTMRegressor(nn.Module):
     def __init__(self, num_embeddings, embedding_dim, hidden_dim):
         super(LSTMRegressor, self).__init__()
         self.embedding = nn.Embedding(
-            num_embeddings, embedding_dim, padding_idx=0)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)
+            num_embeddings, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim,
+                            batch_first=True, num_layers=2, dropout=0.6)
         # Outputs one angle per time step
         self.linear = nn.Linear(hidden_dim, 1)
 
@@ -31,8 +32,9 @@ class LSTMClassifier(nn.Module):
         super(LSTMClassifier, self).__init__()
         self.num_classes = num_classes
         self.embedding = nn.Embedding(
-            num_embeddings, embedding_dim, padding_idx=0)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)
+            num_embeddings, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim,
+                            batch_first=True, num_layers=2, dropout=0.6)
         # Outputting 2 classes
         self.linear = nn.Linear(hidden_dim, num_classes)
 

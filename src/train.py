@@ -92,8 +92,9 @@ def train_classifier(
 
     # Compute class weights
     class_weights = compute_class_weight(
-        class_weight='balanced', classes=np.unique(all_labels), y=all_labels)
+        class_weight="balanced", classes=np.unique(all_labels), y=all_labels)
     class_weights_tensor = torch.tensor(class_weights, dtype=torch.float32)
+    print(f"Class weights: {class_weights}")
 
     # DataLoader
     train_loader = DataLoader(NucleotideDataset(torch.tensor(padded_sequences_train),
@@ -107,8 +108,8 @@ def train_classifier(
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     train_losses = []
+    model.train()  # Set the model to training mode
     for epoch in range(num_epochs):
-        model.train()  # Set the model to training mode
         total_loss = 0
 
         # Training Loop
