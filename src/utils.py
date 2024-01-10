@@ -50,6 +50,43 @@ def decode_sequences(sequences, masks=None):
     return ["".join(x) for x in decoded_sequences]
 
 
+def create_mask(sequences, padding_value=0):
+    return [[float(token != padding_value) for token in seq] for seq in sequences]
+# Custom Dataset class
+
+
+def read_fasta(in_path: str):
+    sequences = list()
+    names = list()
+    current_sequence = ""
+
+    with open(in_path, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if line.startswith('>'):
+                # If a new sequence header is found, append the previous sequence (if any) to the list
+                if current_sequence:
+                    sequences.append(current_sequence)
+                # Start a new sequence
+                current_sequence = ""
+                names.append(line[1:])
+            else:
+                # Append the current line to the current sequence
+                current_sequence += line
+
+        # Append the last sequence in the file
+        if current_sequence:
+            sequences.append(current_sequence)
+    return sequences, names
+
+
+def fasta_preprocess(sequences_list: [str]):
+    encoded_sequences, _ = encode_sequences(sequences_list, [])
+    padded_sequences, _, masks = pad_sequences(
+        encoded_sequences, encoded_sequences)
+    return padded_sequences, masks
+
+
 def process_data(sequences, gammas, maxlen=200):
     encoded_sequences, encoded_gammas = encode_sequences(sequences, gammas)
     padded_sequences, padded_gammas, masks = pad_sequences(
