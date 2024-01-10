@@ -54,8 +54,10 @@ def create_mask(sequences, padding_value=0):
     return [[float(token != padding_value) for token in seq] for seq in sequences]
 # Custom Dataset class
 
+
 def read_fasta(in_path: str):
     sequences = list()
+    names = list()
     current_sequence = ""
 
     with open(in_path, 'r') as file:
@@ -67,6 +69,7 @@ def read_fasta(in_path: str):
                     sequences.append(current_sequence)
                 # Start a new sequence
                 current_sequence = ""
+                names.append(line[1:])
             else:
                 # Append the current line to the current sequence
                 current_sequence += line
@@ -74,15 +77,13 @@ def read_fasta(in_path: str):
         # Append the last sequence in the file
         if current_sequence:
             sequences.append(current_sequence)
-    return sequences
+    return sequences, names
 
 
-
-def fasta_preprocess(in_path: str):
-    sequences_list = read_fasta(in_path)
+def fasta_preprocess(sequences_list: [str]):
     encoded_sequences, _ = encode_sequences(sequences_list, [])
-    padded_sequences = pad_sequences(encoded_sequences)
-    masks = create_mask(padded_sequences)
+    padded_sequences, _, masks = pad_sequences(
+        encoded_sequences, encoded_sequences)
     return padded_sequences, masks
 
 
