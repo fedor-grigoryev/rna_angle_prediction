@@ -9,9 +9,7 @@ import matplotlib.pyplot as plt
 from IPython import display
 from utils import NucleotideDataset
 
-
-num_epochs = 5
-
+num_epochs = 7
 
 def custom_mae_loss(output, target, mask):
     # Calculate the absolute difference

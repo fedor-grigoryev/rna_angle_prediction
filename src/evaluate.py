@@ -67,11 +67,11 @@ def evaluate_classifier(model,
             accuracies.append(accuracy_score(
                 angle_classes_masked.cpu(), predictions.cpu()))
             precisions.append(precision_score(angle_classes_masked.cpu(
-            ), predictions.cpu(), average='micro', zero_division=0))
+            ), predictions.cpu(), average='weighted', zero_division=1))
             recalls.append(recall_score(angle_classes_masked.cpu(),
-                                        predictions.cpu(), average='micro', zero_division=0))
+                                        predictions.cpu(), average='weighted', zero_division=1))
             f1s.append(f1_score(angle_classes_masked.cpu(),
-                                predictions.cpu(), average='micro', zero_division=0))
+                                predictions.cpu(), average='weighted', zero_division=1))
 
     # Average the metrics over all batches
     average_accuracy = sum(accuracies) / len(accuracies)
@@ -85,14 +85,14 @@ def evaluate_classifier(model,
     print(f"Test F1 Score: {average_f1:.4f}")
 
 
-def compare_spot_rna_1d_regressor(model,
-                                  spot_rna_gammas_train,
-                                  padded_sequences_train,
-                                  masks_train,
-                                  spot_rna_gammas_test,
-                                  padded_sequences_test,
-                                  masks_test,
-                                  ):
+def compare_dssr_regressor(model,
+                           dssr_gammas_train,
+                           padded_sequences_train,
+                           masks_train,
+                           dssr_gammas_test,
+                           padded_sequences_test,
+                           masks_test,
+                           ):
     model.eval()
     sequences_train = torch.tensor(padded_sequences_train)
     masks_train = torch.tensor(masks_train)
@@ -121,19 +121,19 @@ def compare_spot_rna_1d_regressor(model,
             model_gammas_test[decoded_sequences_test[i]
                               ] = output_test[i][:int(sum(masks_test[i]))]
 
-    for seq in spot_rna_gammas_train.keys():
+    for seq in dssr_gammas_train.keys():
         shinked_seq = seq[:200]
         if shinked_seq in model_gammas_train.keys():
             abs_diff = torch.abs(
-                model_gammas_train[shinked_seq] - torch.tensor(spot_rna_gammas_train[seq][:200]))
+                model_gammas_train[shinked_seq] - torch.tensor(dssr_gammas_train[seq][:200]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_train[seq] = mae.mean().item()
 
-    for seq in spot_rna_gammas_test.keys():
+    for seq in dssr_gammas_test.keys():
         shinked_seq = seq[:200]
         if shinked_seq in model_gammas_test.keys():
             abs_diff = torch.abs(
-                model_gammas_test[shinked_seq] - torch.tensor(spot_rna_gammas_test[seq][:200]))
+                model_gammas_test[shinked_seq] - torch.tensor(dssr_gammas_test[seq][:200]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_test[seq] = mae.mean().item()
 
@@ -144,15 +144,15 @@ def compare_spot_rna_1d_regressor(model,
         json.dump(mae_test, f)
 
 
-def compare_spot_rna_1d_classifier(model,
-                                   num_classes,
-                                   spot_rna_gammas_train,
-                                   padded_sequences_train,
-                                   masks_train,
-                                   spot_rna_gammas_test,
-                                   padded_sequences_test,
-                                   masks_test,
-                                   ):
+def compare_dssr_classifier(model,
+                            num_classes,
+                            dssr_gammas_train,
+                            padded_sequences_train,
+                            masks_train,
+                            dssr_gammas_test,
+                            padded_sequences_test,
+                            masks_test,
+                            ):
     model.eval()
     sequences_train = torch.tensor(padded_sequences_train)
     masks_train = torch.tensor(masks_train)
@@ -176,8 +176,8 @@ def compare_spot_rna_1d_classifier(model,
         output_train = output_train.apply_(
             lambda class_index: class_index * 360/num_classes + 360/num_classes/2)
 
-        #print('output_train')
-        #print(output_train)
+        # print('output_train')
+        # print(output_train)
 
         for i in range(len(decoded_sequences_train)):
             model_gammas_train[decoded_sequences_train[i]
@@ -192,19 +192,19 @@ def compare_spot_rna_1d_classifier(model,
             model_gammas_test[decoded_sequences_test[i]
                               ] = output_test[i][:int(sum(masks_test[i]))]
 
-    for seq in spot_rna_gammas_train.keys():
+    for seq in dssr_gammas_train.keys():
         shinked_seq = seq[:200]
         if shinked_seq in model_gammas_train.keys():
             abs_diff = torch.abs(
-                model_gammas_train[shinked_seq] - torch.tensor(spot_rna_gammas_train[seq][:200]))
+                model_gammas_train[shinked_seq] - torch.tensor(dssr_gammas_train[seq][:200]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_train[seq] = mae.mean().item()
 
-    for seq in spot_rna_gammas_test.keys():
+    for seq in dssr_gammas_test.keys():
         shinked_seq = seq[:200]
         if shinked_seq in model_gammas_test.keys():
             abs_diff = torch.abs(
-                model_gammas_test[shinked_seq] - torch.tensor(spot_rna_gammas_test[seq][:200]))
+                model_gammas_test[shinked_seq] - torch.tensor(dssr_gammas_test[seq][:200]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_test[seq] = mae.mean().item()
 
@@ -214,14 +214,15 @@ def compare_spot_rna_1d_classifier(model,
     with open(f'../results/{num_classes}ClassClassifier/mae_test.json', "w") as f:
         json.dump(mae_test, f)
 
-def compare_spot_rna_1d_bin_stats_classifier(model,
-                                   spot_rna_gammas_train,
-                                   padded_sequences_train,
-                                   masks_train,
-                                   spot_rna_gammas_test,
-                                   padded_sequences_test,
-                                   masks_test,
-                                   ):
+
+def compare_dssr_bin_stats_classifier(model,
+                                      dssr_gammas_train,
+                                      padded_sequences_train,
+                                      masks_train,
+                                      dssr_gammas_test,
+                                      padded_sequences_test,
+                                      masks_test,
+                                      ):
     # Define a mapping from classes to angle values
     class_to_angle_mapping = {
         0: 55.038,
@@ -249,7 +250,8 @@ def compare_spot_rna_1d_bin_stats_classifier(model,
     with torch.no_grad():
         output_train = model(sequences_train)
         output_train = torch.argmax(output_train, dim=2)
-        output_train = output_train.apply_(lambda class_index: class_to_angle_mapping[class_index])
+        output_train = output_train.apply_(
+            lambda class_index: class_to_angle_mapping[class_index])
 
         print('output_train')
         print(output_train)
@@ -260,25 +262,26 @@ def compare_spot_rna_1d_bin_stats_classifier(model,
 
         output_test = model(sequences_test)
         output_test = torch.argmax(output_test, dim=2)
-        output_test.apply_(lambda class_index: class_to_angle_mapping[class_index])
+        output_test.apply_(
+            lambda class_index: class_to_angle_mapping[class_index])
 
         for i in range(len(decoded_sequences_test)):
             model_gammas_test[decoded_sequences_test[i]
                               ] = output_test[i][:int(sum(masks_test[i]))]
 
-    for seq in spot_rna_gammas_train.keys():
+    for seq in dssr_gammas_train.keys():
         shinked_seq = seq[:200]
         if shinked_seq in model_gammas_train.keys():
             abs_diff = torch.abs(
-                model_gammas_train[shinked_seq] - torch.tensor(spot_rna_gammas_train[seq][:200]))
+                model_gammas_train[shinked_seq] - torch.tensor(dssr_gammas_train[seq][:200]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_train[seq] = mae.mean().item()
 
-    for seq in spot_rna_gammas_test.keys():
+    for seq in dssr_gammas_test.keys():
         shinked_seq = seq[:200]
         if shinked_seq in model_gammas_test.keys():
             abs_diff = torch.abs(
-                model_gammas_test[shinked_seq] - torch.tensor(spot_rna_gammas_test[seq][:200]))
+                model_gammas_test[shinked_seq] - torch.tensor(dssr_gammas_test[seq][:200]))
             mae = torch.min(abs_diff, 360 - abs_diff)
             mae_test[seq] = mae.mean().item()
 
@@ -360,4 +363,33 @@ def compare_spot_rna_1d_3_stats_classifier(model,
         json.dump(mae_train, f)
 
     with open(f'../results/ThreeClassClassifier/mae_test.json', "w") as f:
+        json.dump(mae_train, f)
+
+def compare_dssr_spot_angles(
+        dssr_gammas_train,
+        spot_rna_gammas_train,
+        dssr_gammas_test,
+        spot_rna_gammas_test,
+):
+    mae_train = {}
+    mae_test = {}
+
+    for seq in dssr_gammas_train.keys():
+        if seq in spot_rna_gammas_train.keys():
+            abs_diff = torch.abs(
+                torch.tensor(spot_rna_gammas_train[seq]) - torch.tensor(dssr_gammas_train[seq]))
+            mae = torch.min(abs_diff, 360 - abs_diff)
+            mae_train[seq] = mae.mean().item()
+
+    for seq in dssr_gammas_test.keys():
+        if seq in spot_rna_gammas_test.keys():
+            abs_diff = torch.abs(
+                torch.tensor(spot_rna_gammas_test[seq]) - torch.tensor(dssr_gammas_test[seq]))
+            mae = torch.min(abs_diff, 360 - abs_diff)
+            mae_test[seq] = mae.mean().item()
+
+    with open(f'../results/SPOT-RNA-1D/mae_train.json', "w") as f:
+        json.dump(mae_train, f)
+
+    with open(f'../results/SPOT-RNA-1D/mae_test.json', "w") as f:
         json.dump(mae_test, f)
