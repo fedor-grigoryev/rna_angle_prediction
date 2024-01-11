@@ -31,6 +31,38 @@ This repo is a wrapper around skeleton that was provided to us to start.
 
 3. Add modifications to main to test desirable functionality
 
+## Example of CLI run
+
+This package is designed to be executed through the CLI using Python. Below is an example demonstrating the usage of the package with detailed explanations for the required arguments.
+
+`--input_path`: an absolute path to the input fasta file containing RNA sequences for inference.
+              Example of the fasta file contents:
+              "
+                >17EP
+                ACGUUCU
+              "
+
+`--out_path`: an absolute path to write the model output in JSON format.
+
+`--model_type`: Specifies the model to be used for inference. Choose from the following options:
+
+* `binary`: Binary model
+* `tertiary`: Tertiary model
+* `20`: 20-class quantized model
+* `30`: 30-class quantized model
+* `regression`: Regression model
+
+Example run:
+
+```bash
+python3 angles_helper.py \
+    --input_path '../data/sample/example.fasta' \
+    --out_path '../results/test_output.json' \
+    --model_type 'binary'
+```
+
+This example command initiates the `angles_helper` package, providing the necessary input parameters. Adjust the paths and model type based on your specific use case. The output will be stored in the specified JSON file.
+
 ## TO-DO
 
 - Include python requirements to run your code with good library versions.
