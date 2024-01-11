@@ -9,7 +9,7 @@ import json
 from models import LSTMRegressor, LSTMClassifier
 from utils import calculate_class_index, calculate_binary_index
 from train import train_regressor, train_classifier
-from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles,compare_spot_rna_1d_bin_stats_classifier
+from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles, compare_spot_rna_1d_bin_stats_classifier
 
 if __name__ == "__main__":
     # visualise_distr("../data/angles/TrainingSet")
@@ -44,86 +44,88 @@ if __name__ == "__main__":
         [calculate_class_index(x, num_classes=30) for x in seq] for seq in padded_gammas_test]
 
 # ------------------ TRAINING AND SAVING MODELS --------------------------------
-    # REGRESSION APPROACH
-    print("REGRESSION APPROACH")
-    Regressor = LSTMRegressor(
-        num_embeddings=4, embedding_dim=8, hidden_dim=15)
+    # # REGRESSION APPROACH
+    # print("REGRESSION APPROACH")
+    # Regressor = LSTMRegressor(
+    #     num_embeddings=4, embedding_dim=8, hidden_dim=15)
 
-    train_regressor(Regressor,
-                    padded_sequences_train,
-                    padded_gammas_train,
-                    masks_train)
-    # Save the model
-    torch.save(Regressor, "../models/Regressor.pt")
+    # train_regressor(Regressor,
+    #                 padded_sequences_train,
+    #                 padded_gammas_train,
+    #                 masks_train)
+    # # Save the model
+    # torch.save(Regressor, "../models/Regressor.pt")
 
-    # BINARY CLASSIFICATION APPROACH
-    print("BINARY CLASSIFICATION APPROACH")
+    # # BINARY CLASSIFICATION APPROACH
+    # print("BINARY CLASSIFICATION APPROACH")
 
-    BinClassifier = LSTMClassifier(
-        num_embeddings=4, embedding_dim=4, hidden_dim=4, num_classes=2)
+    # BinClassifier = LSTMClassifier(
+    #     num_embeddings=4, embedding_dim=4, hidden_dim=4, num_classes=2)
 
-    train_classifier(BinClassifier,
-                     num_classes=2,
-                     padded_sequences_train=padded_sequences_train,
-                     padded_gammas_train=padded_gammas_bin_classes_train,
-                     masks_train=masks_train,
-                     )
+    # train_classifier(BinClassifier,
+    #                  num_classes=2,
+    #                  padded_sequences_train=padded_sequences_train,
+    #                  padded_gammas_train=padded_gammas_bin_classes_train,
+    #                  masks_train=masks_train,
+    #                  )
 
-    # Save the model
-    torch.save(BinClassifier, "../models/BinClassifier.pt")
+    # # Save the model
+    # torch.save(BinClassifier, "../models/BinClassifier.pt")
 
-    # BINARY STATS CLASSIFICATION APPROACH
-    print("BINARY STATS CLASSIFICATION APPROACH")
+    # # BINARY STATS CLASSIFICATION APPROACH
+    # print("BINARY STATS CLASSIFICATION APPROACH")
 
-    BinStatsClassifier = LSTMClassifier(
-        num_embeddings=4, embedding_dim=4, hidden_dim=4, num_classes=2)
+    # BinStatsClassifier = LSTMClassifier(
+    #     num_embeddings=4, embedding_dim=4, hidden_dim=4, num_classes=2)
 
-    train_classifier(BinStatsClassifier,
-                     num_classes=2,
-                     padded_sequences_train=padded_sequences_train,
-                     padded_gammas_train=padded_gammas_bin_stats_classes_train,
-                     masks_train=masks_train,
-                     )
+    # train_classifier(BinStatsClassifier,
+    #                  num_classes=2,
+    #                  padded_sequences_train=padded_sequences_train,
+    #                  padded_gammas_train=padded_gammas_bin_stats_classes_train,
+    #                  masks_train=masks_train,
+    #                  )
 
-    # Save the model
-    torch.save(BinStatsClassifier, "../models/BinStatsClassifier.pt")
+    # # Save the model
+    # torch.save(BinStatsClassifier, "../models/BinStatsClassifier.pt")
 
-    # MULTI-CLASS CLASSIFICATION APPROACH
-    # 20 Classes
-    print("20 CLASSES CLASSIFICATION APPROACH")
-    TwentyClassifier = LSTMClassifier(
-        num_embeddings=4, embedding_dim=8, hidden_dim=15, num_classes=20)
+    # # MULTI-CLASS CLASSIFICATION APPROACH
+    # # 20 Classes
+    # print("20 CLASSES CLASSIFICATION APPROACH")
+    # TwentyClassifier = LSTMClassifier(
+    #     num_embeddings=4, embedding_dim=8, hidden_dim=15, num_classes=20)
 
-    train_classifier(TwentyClassifier,
-                     num_classes=20,
-                     padded_sequences_train=padded_sequences_train,
-                     padded_gammas_train=padded_gammas_20_classes_train,
-                     masks_train=masks_train,
-                     )
+    # train_classifier(TwentyClassifier,
+    #                  num_classes=20,
+    #                  padded_sequences_train=padded_sequences_train,
+    #                  padded_gammas_train=padded_gammas_20_classes_train,
+    #                  masks_train=masks_train,
+    #                  )
 
-    # Save the model
-    torch.save(TwentyClassifier, "../models/TwentyClassifier.pt")
+    # # Save the model
+    # torch.save(TwentyClassifier, "../models/TwentyClassifier.pt")
 
-    print("30 CLASSES CLASSIFICATION APPROACH")
-    ThirtyClassifier = LSTMClassifier(
-        num_embeddings=5, embedding_dim=8, hidden_dim=15, num_classes=30)
+    # print("30 CLASSES CLASSIFICATION APPROACH")
+    # ThirtyClassifier = LSTMClassifier(
+    #     num_embeddings=5, embedding_dim=8, hidden_dim=15, num_classes=30)
 
-    train_classifier(ThirtyClassifier,
-                     num_classes=30,
-                     padded_sequences_train=padded_sequences_train,
-                     padded_gammas_train=padded_gammas_30_classes_train,
-                     masks_train=masks_train,
-                     )
+    # train_classifier(ThirtyClassifier,
+    #                  num_classes=30,
+    #                  padded_sequences_train=padded_sequences_train,
+    #                  padded_gammas_train=padded_gammas_30_classes_train,
+    #                  masks_train=masks_train,
+    #                  )
 
-    # Save the model
-    torch.save(ThirtyClassifier, "../models/ThirtyClassifier.pt")
+    # # Save the model
+    # torch.save(ThirtyClassifier, "../models/ThirtyClassifier.pt")
 
 # ------------------ LOADING MODELS AND EVALUATING -----------------------------
 
     # Load json files
 
-    f_spot_rna_angles_train = open("../data/SPOT-RNA-1D/training.json")
-    f_spot_rna_angles_test = open("../data/SPOT-RNA-1D/test.json")
+    # f_spot_rna_angles_train = open("../data/SPOT-RNA-1D/training.json")
+    # f_spot_rna_angles_test = open("../data/SPOT-RNA-1D/test.json")
+    f_spot_rna_angles_train = open("../data/json/train.json")
+    f_spot_rna_angles_test = open("../data/json/test.json")
     spot_rna_angles_train = json.load(f_spot_rna_angles_train)
     spot_rna_angles_test = json.load(f_spot_rna_angles_test)
     f_spot_rna_angles_train.close()
@@ -192,13 +194,13 @@ if __name__ == "__main__":
                         masks_test=masks_test)
 
     compare_spot_rna_1d_bin_stats_classifier(BinStatsClassifier,
-                                   spot_rna_gammas_train=spot_rna_gammas_train,
-                                   padded_sequences_train=padded_sequences_train,
-                                   masks_train=masks_train,
-                                   spot_rna_gammas_test=spot_rna_gammas_test,
-                                   padded_sequences_test=padded_sequences_test,
-                                   masks_test=masks_test,
-                                   )
+                                             spot_rna_gammas_train=spot_rna_gammas_train,
+                                             padded_sequences_train=padded_sequences_train,
+                                             masks_train=masks_train,
+                                             spot_rna_gammas_test=spot_rna_gammas_test,
+                                             padded_sequences_test=padded_sequences_test,
+                                             masks_test=masks_test,
+                                             )
 
     # MULTI-CLASS CLASSIFICATION APPROACH
     # 20 Classes
