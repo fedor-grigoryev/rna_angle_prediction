@@ -66,6 +66,10 @@ class AngleHelper:
         tmasks = torch.tensor(masks).bool()
         outputs_masked = [out[tmask] for out, tmask in zip(outputs, tmasks)]
 
+        if num_classes is not None:
+            outputs_masked = list(map(lambda class_index: class_index *
+                                      360/num_classes + 360/num_classes/2, outputs_masked))
+
         result_json = {}
 
         for i in range(len(outputs_masked)):
