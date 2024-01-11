@@ -55,7 +55,10 @@ This package is designed to be executed through the CLI using Python. Below is a
 Example run:
 
 ```bash
-python3 angles_helper.py --input_path '../data/sample/example.fasta' --out_path '../results/test_output.json' --model_type 'binary'
+python3 angles_helper.py \
+    --input_path '../data/sample/example.fasta' \
+    --out_path '../results/test_output.json' \
+    --model_type 'binary'
 ```
 
 This example command initiates the `angles_helper` package, providing the necessary input parameters. Adjust the paths and model type based on your specific use case. The output will be stored in the specified JSON file.
