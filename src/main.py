@@ -7,9 +7,9 @@ import json
 
 
 from models import LSTMRegressor, LSTMClassifier
-from utils import calculate_class_index, calculate_binary_index
+from utils import calculate_class_index, calculate_binary_index, calculate_tertiary_index
 from train import train_regressor, train_classifier
-from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles,compare_spot_rna_1d_bin_stats_classifier
+from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles,compare_spot_rna_1d_bin_stats_classifier,compare_spot_rna_1d_3_stats_classifier
 
 if __name__ == "__main__":
     # visualise_distr("../data/angles/TrainingSet")
@@ -31,6 +31,11 @@ if __name__ == "__main__":
         [calculate_binary_index(x) for x in seq] for seq in padded_gammas_train]
     padded_gammas_bin_stats_classes_test = [
         [calculate_binary_index(x) for x in seq] for seq in padded_gammas_test]
+
+    padded_gammas_3_classes_train = [
+        [calculate_tertiary_index(x) for x in seq] for seq in padded_gammas_train]
+    padded_gammas_3_classes_test = [
+        [calculate_tertiary_index(x) for x in seq] for seq in padded_gammas_test]
 
     # Convert gammas to multi classes
     padded_gammas_20_classes_train = [
@@ -87,6 +92,21 @@ if __name__ == "__main__":
 
     # Save the model
     torch.save(BinStatsClassifier, "../models/BinStatsClassifier.pt")
+
+    # 3-CLASSES-STATS CLASSIFICATION APPROACH
+    print("3 CLASSES STATS CLASSIFICATION APPROACH")
+    ThreeClassifier = LSTMClassifier(
+        num_embeddings=4, embedding_dim=8, hidden_dim=15, num_classes=3)
+
+    train_classifier(ThreeClassifier,
+                     num_classes=3,
+                     padded_sequences_train=padded_sequences_train,
+                     padded_gammas_train=padded_gammas_3_classes_train,
+                     masks_train=masks_train,
+                     )
+
+    # Save the model
+    torch.save(ThreeClassifier, "../models/ThreeClassifier.pt")
 
     # MULTI-CLASS CLASSIFICATION APPROACH
     # 20 Classes
@@ -192,6 +212,28 @@ if __name__ == "__main__":
                         masks_test=masks_test)
 
     compare_spot_rna_1d_bin_stats_classifier(BinStatsClassifier,
+                                   spot_rna_gammas_train=spot_rna_gammas_train,
+                                   padded_sequences_train=padded_sequences_train,
+                                   masks_train=masks_train,
+                                   spot_rna_gammas_test=spot_rna_gammas_test,
+                                   padded_sequences_test=padded_sequences_test,
+                                   masks_test=masks_test,
+                                   )
+
+    # 3-CLASS CLASSIFICATION APPROACH
+    print("3 CLASSES CLASSIFICATION APPROACH")
+    ThreeClassifier = torch.load("../models/ThreeClassifier.pt")
+    angles = predict_angles(ThreeClassifier,
+                            sequences=sequences_test,
+                            num_classes=3)
+
+    evaluate_classifier(ThreeClassifier,
+                        num_classes=3,
+                        padded_sequences_test=padded_sequences_test,
+                        padded_gammas_test=padded_gammas_3_classes_test,
+                        masks_test=masks_test)
+
+    compare_spot_rna_1d_3_stats_classifier(ThreeClassifier,
                                    spot_rna_gammas_train=spot_rna_gammas_train,
                                    padded_sequences_train=padded_sequences_train,
                                    masks_train=masks_train,
