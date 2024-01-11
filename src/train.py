@@ -10,7 +10,7 @@ from IPython import display
 from utils import NucleotideDataset
 
 
-num_epochs = 25
+num_epochs = 6
 
 
 def custom_mae_loss(output, target, mask):

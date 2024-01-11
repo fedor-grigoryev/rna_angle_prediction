@@ -113,6 +113,8 @@ def calculate_class_index(angle, num_classes):
     if angle == 180:
         class_index -= 1
     return class_index
+
+
 def calculate_binary_index(angle):
     # Calculate the class index
     if angle < 0:
@@ -125,9 +127,11 @@ def calculate_binary_index(angle):
 
     return class_index
 
+
 def convert_classes_to_angles(classes, num_classes):
     # Convert the classes the average angle in range
-    return [class_index * 360/num_classes + 360/num_classes/2 for class_index in classes]
+    return [min(class_index * 360/num_classes + 360/num_classes/2, 360 - class_index * 360/num_classes + 360/num_classes/2)
+            for class_index in classes]
 
 
 class NucleotideDataset(Dataset):

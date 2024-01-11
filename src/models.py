@@ -1,6 +1,9 @@
 import torch
 from torch import nn
 
+# for reproducibility
+torch.manual_seed(0)
+
 
 class LSTMRegressor(nn.Module):
     def __init__(self, num_embeddings, embedding_dim, hidden_dim):

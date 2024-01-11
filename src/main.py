@@ -9,7 +9,7 @@ import json
 from models import LSTMRegressor, LSTMClassifier
 from utils import calculate_class_index, calculate_binary_index
 from train import train_regressor, train_classifier
-from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles,compare_spot_rna_1d_bin_stats_classifier
+from evaluate import evaluate_classifier, compare_dssr_regressor, compare_dssr_classifier, predict_angles, compare_dssr_bin_stats_classifier, compare_dssr_spot_angles
 
 if __name__ == "__main__":
     # visualise_distr("../data/angles/TrainingSet")
@@ -129,8 +129,17 @@ if __name__ == "__main__":
     f_spot_rna_angles_train.close()
     f_spot_rna_angles_test.close()
 
+    f_dssr_angles_train = open("../data/json/train.json")
+    f_dssr_angles_test = open("../data/json/test.json")
+    dssr_angles_train = json.load(f_dssr_angles_train)
+    dssr_angles_test = json.load(f_dssr_angles_test)
+    f_dssr_angles_train.close()
+    f_dssr_angles_test.close()
+
     spot_rna_gammas_train = {}
     spot_rna_gammas_test = {}
+    dssr_gammas_train = {}
+    dssr_gammas_test = {}
 
     for key in spot_rna_angles_train.keys():
         spot_rna_gammas_train[spot_rna_angles_train[key]
@@ -140,6 +149,14 @@ if __name__ == "__main__":
         spot_rna_gammas_test[spot_rna_angles_test[key]
                              ['sequence']] = spot_rna_angles_test[key]['angles']['gamma']
 
+    for key in dssr_angles_train.keys():
+        dssr_gammas_train[dssr_angles_train[key]
+                          ['sequence']] = dssr_angles_train[key]['angles']['gamma']
+
+    for key in dssr_angles_test.keys():
+        dssr_gammas_test[dssr_angles_test[key]
+                         ['sequence']] = dssr_angles_test[key]['angles']['gamma']
+
     # REGRESSION APPROACH
     print("REGRESSION APPROACH")
     Regressor = torch.load("../models/Regressor.pt")
@@ -147,13 +164,13 @@ if __name__ == "__main__":
                             sequences=sequences_test,
                             num_classes=None)
 
-    compare_spot_rna_1d_regressor(Regressor,
-                                  spot_rna_gammas_train,
-                                  padded_sequences_train,
-                                  masks_train,
-                                  spot_rna_gammas_test,
-                                  padded_sequences_test,
-                                  masks_test)
+    compare_dssr_regressor(Regressor,
+                           dssr_gammas_train,
+                           padded_sequences_train,
+                           masks_train,
+                           dssr_gammas_test,
+                           padded_sequences_test,
+                           masks_test)
 
     # BINARY CLASSIFICATION APPROACH
     print("BINARY CLASSIFICATION APPROACH")
@@ -168,15 +185,15 @@ if __name__ == "__main__":
                         padded_gammas_test=padded_gammas_bin_classes_test,
                         masks_test=masks_test)
 
-    compare_spot_rna_1d_classifier(BinClassifier,
-                                   num_classes=2,
-                                   spot_rna_gammas_train=spot_rna_gammas_train,
-                                   padded_sequences_train=padded_sequences_train,
-                                   masks_train=masks_train,
-                                   spot_rna_gammas_test=spot_rna_gammas_test,
-                                   padded_sequences_test=padded_sequences_test,
-                                   masks_test=masks_test,
-                                   )
+    compare_dssr_classifier(BinClassifier,
+                            num_classes=2,
+                            dssr_gammas_train=dssr_gammas_train,
+                            padded_sequences_train=padded_sequences_train,
+                            masks_train=masks_train,
+                            dssr_gammas_test=dssr_gammas_test,
+                            padded_sequences_test=padded_sequences_test,
+                            masks_test=masks_test,
+                            )
 
     # BINARY STATS CLASSIFICATION APPROACH
     print("BINARY STATS CLASSIFICATION APPROACH")
@@ -191,14 +208,14 @@ if __name__ == "__main__":
                         padded_gammas_test=padded_gammas_bin_stats_classes_test,
                         masks_test=masks_test)
 
-    compare_spot_rna_1d_bin_stats_classifier(BinStatsClassifier,
-                                   spot_rna_gammas_train=spot_rna_gammas_train,
-                                   padded_sequences_train=padded_sequences_train,
-                                   masks_train=masks_train,
-                                   spot_rna_gammas_test=spot_rna_gammas_test,
-                                   padded_sequences_test=padded_sequences_test,
-                                   masks_test=masks_test,
-                                   )
+    compare_dssr_bin_stats_classifier(BinStatsClassifier,
+                                      dssr_gammas_train=dssr_gammas_train,
+                                      padded_sequences_train=padded_sequences_train,
+                                      masks_train=masks_train,
+                                      dssr_gammas_test=dssr_gammas_test,
+                                      padded_sequences_test=padded_sequences_test,
+                                      masks_test=masks_test,
+                                      )
 
     # MULTI-CLASS CLASSIFICATION APPROACH
     # 20 Classes
@@ -213,15 +230,15 @@ if __name__ == "__main__":
                         padded_sequences_test=padded_sequences_test,
                         padded_gammas_test=padded_gammas_20_classes_test,
                         masks_test=masks_test)
-    compare_spot_rna_1d_classifier(TwentyClassifier,
-                                   num_classes=20,
-                                   spot_rna_gammas_train=spot_rna_gammas_train,
-                                   padded_sequences_train=padded_sequences_train,
-                                   masks_train=masks_train,
-                                   spot_rna_gammas_test=spot_rna_gammas_test,
-                                   padded_sequences_test=padded_sequences_test,
-                                   masks_test=masks_test,
-                                   )
+    compare_dssr_classifier(TwentyClassifier,
+                            num_classes=20,
+                            dssr_gammas_train=dssr_gammas_train,
+                            padded_sequences_train=padded_sequences_train,
+                            masks_train=masks_train,
+                            dssr_gammas_test=dssr_gammas_test,
+                            padded_sequences_test=padded_sequences_test,
+                            masks_test=masks_test,
+                            )
 
     # 30 Classes
     print("30 CLASSES CLASSIFICATION APPROACH")
@@ -236,12 +253,18 @@ if __name__ == "__main__":
                         padded_gammas_test=padded_gammas_30_classes_test,
                         masks_test=masks_test)
 
-    compare_spot_rna_1d_classifier(ThirtyClassifier,
-                                   num_classes=30,
-                                   spot_rna_gammas_train=spot_rna_gammas_train,
-                                   padded_sequences_train=padded_sequences_train,
-                                   masks_train=masks_train,
-                                   spot_rna_gammas_test=spot_rna_gammas_test,
-                                   padded_sequences_test=padded_sequences_test,
-                                   masks_test=masks_test,
-                                   )
+    compare_dssr_classifier(ThirtyClassifier,
+                            num_classes=30,
+                            dssr_gammas_train=dssr_gammas_train,
+                            padded_sequences_train=padded_sequences_train,
+                            masks_train=masks_train,
+                            dssr_gammas_test=dssr_gammas_test,
+                            padded_sequences_test=padded_sequences_test,
+                            masks_test=masks_test,
+                            )
+
+    # Compare DSSR and SPOT-RNA
+    compare_dssr_spot_angles(dssr_gammas_train,
+                             spot_rna_gammas_train,
+                             dssr_gammas_test,
+                             spot_rna_gammas_test)
