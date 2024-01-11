@@ -9,7 +9,7 @@ import json
 from models import LSTMRegressor, LSTMClassifier
 from utils import calculate_class_index, calculate_binary_index
 from train import train_regressor, train_classifier
-from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles
+from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles,compare_spot_rna_1d_bin_stats_classifier
 
 if __name__ == "__main__":
     # visualise_distr("../data/angles/TrainingSet")
@@ -191,8 +191,7 @@ if __name__ == "__main__":
                         padded_gammas_test=padded_gammas_bin_stats_classes_test,
                         masks_test=masks_test)
 
-    compare_spot_rna_1d_classifier(BinStatsClassifier,
-                                   num_classes=2,
+    compare_spot_rna_1d_bin_stats_classifier(BinStatsClassifier,
                                    spot_rna_gammas_train=spot_rna_gammas_train,
                                    padded_sequences_train=padded_sequences_train,
                                    masks_train=masks_train,

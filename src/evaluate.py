@@ -176,6 +176,9 @@ def compare_spot_rna_1d_classifier(model,
         output_train = output_train.apply_(
             lambda class_index: class_index * 360/num_classes + 360/num_classes/2)
 
+        #print('output_train')
+        #print(output_train)
+
         for i in range(len(decoded_sequences_train)):
             model_gammas_train[decoded_sequences_train[i]
                                ] = output_train[i][:int(sum(masks_train[i]))]
@@ -209,4 +212,78 @@ def compare_spot_rna_1d_classifier(model,
         json.dump(mae_train, f)
 
     with open(f'../results/{num_classes}ClassClassifier/mae_test.json', "w") as f:
+        json.dump(mae_test, f)
+
+def compare_spot_rna_1d_bin_stats_classifier(model,
+                                   spot_rna_gammas_train,
+                                   padded_sequences_train,
+                                   masks_train,
+                                   spot_rna_gammas_test,
+                                   padded_sequences_test,
+                                   masks_test,
+                                   ):
+    # Define a mapping from classes to angle values
+    class_to_angle_mapping = {
+        0: 55.038,
+        1: 189.917,
+        # Add more mappings if needed for other classes
+    }
+
+    model.eval()
+    sequences_train = torch.tensor(padded_sequences_train)
+    masks_train = torch.tensor(masks_train)
+
+    sequences_test = torch.tensor(padded_sequences_test)
+    masks_test = torch.tensor(masks_test)
+
+    model_gammas_train = {}
+    model_gammas_test = {}
+
+    mae_train = {}
+    mae_test = {}
+
+    decoded_sequences_train = decode_sequences(
+        sequences_train, masks_train)
+    decoded_sequences_test = decode_sequences(sequences_test, masks_test)
+
+    with torch.no_grad():
+        output_train = model(sequences_train)
+        output_train = torch.argmax(output_train, dim=2)
+        output_train = output_train.apply_(lambda class_index: class_to_angle_mapping[class_index])
+
+        print('output_train')
+        print(output_train)
+
+        for i in range(len(decoded_sequences_train)):
+            model_gammas_train[decoded_sequences_train[i]
+                               ] = output_train[i][:int(sum(masks_train[i]))]
+
+        output_test = model(sequences_test)
+        output_test = torch.argmax(output_test, dim=2)
+        output_test.apply_(lambda class_index: class_to_angle_mapping[class_index])
+
+        for i in range(len(decoded_sequences_test)):
+            model_gammas_test[decoded_sequences_test[i]
+                              ] = output_test[i][:int(sum(masks_test[i]))]
+
+    for seq in spot_rna_gammas_train.keys():
+        shinked_seq = seq[:200]
+        if shinked_seq in model_gammas_train.keys():
+            abs_diff = torch.abs(
+                model_gammas_train[shinked_seq] - torch.tensor(spot_rna_gammas_train[seq][:200]))
+            mae = torch.min(abs_diff, 360 - abs_diff)
+            mae_train[seq] = mae.mean().item()
+
+    for seq in spot_rna_gammas_test.keys():
+        shinked_seq = seq[:200]
+        if shinked_seq in model_gammas_test.keys():
+            abs_diff = torch.abs(
+                model_gammas_test[shinked_seq] - torch.tensor(spot_rna_gammas_test[seq][:200]))
+            mae = torch.min(abs_diff, 360 - abs_diff)
+            mae_test[seq] = mae.mean().item()
+
+    with open(f'../results/BinStatsClassClassifier/mae_train.json', "w") as f:
+        json.dump(mae_train, f)
+
+    with open(f'../results/BinStatsClassClassifier/mae_test.json', "w") as f:
         json.dump(mae_test, f)
