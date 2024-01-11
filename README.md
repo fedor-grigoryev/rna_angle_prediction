@@ -41,8 +41,11 @@ This package is designed to be executed through the CLI using Python. Below is a
                 >17EP
                 ACGUUCU
               "
+
 `--out_path`: an absolute path to write the model output in JSON format.
+
 `--model_type`: Specifies the model to be used for inference. Choose from the following options:
+
 * `binary`: Binary model
 * `tertiary`: Tertiary model
 * `20`: 20-class quantized model
