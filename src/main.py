@@ -7,7 +7,7 @@ import json
 
 
 from models import LSTMRegressor, LSTMClassifier
-from utils import calculate_class_index
+from utils import calculate_class_index, calculate_binary_index
 from train import train_regressor, train_classifier
 from evaluate import evaluate_classifier, compare_spot_rna_1d_regressor, compare_spot_rna_1d_classifier, predict_angles
 
@@ -26,6 +26,11 @@ if __name__ == "__main__":
         [calculate_class_index(x, num_classes=2) for x in seq] for seq in padded_gammas_train]
     padded_gammas_bin_classes_test = [
         [calculate_class_index(x, num_classes=2) for x in seq] for seq in padded_gammas_test]
+
+    padded_gammas_bin_stats_classes_train = [
+        [calculate_binary_index(x) for x in seq] for seq in padded_gammas_train]
+    padded_gammas_bin_stats_classes_test = [
+        [calculate_binary_index(x) for x in seq] for seq in padded_gammas_test]
 
     # Convert gammas to multi classes
     padded_gammas_20_classes_train = [
@@ -66,6 +71,22 @@ if __name__ == "__main__":
 
     # Save the model
     torch.save(BinClassifier, "../models/BinClassifier.pt")
+
+    # BINARY STATS CLASSIFICATION APPROACH
+    print("BINARY STATS CLASSIFICATION APPROACH")
+
+    BinStatsClassifier = LSTMClassifier(
+        num_embeddings=4, embedding_dim=4, hidden_dim=4, num_classes=2)
+
+    train_classifier(BinStatsClassifier,
+                     num_classes=2,
+                     padded_sequences_train=padded_sequences_train,
+                     padded_gammas_train=padded_gammas_bin_stats_classes_train,
+                     masks_train=masks_train,
+                     )
+
+    # Save the model
+    torch.save(BinStatsClassifier, "../models/BinStatsClassifier.pt")
 
     # MULTI-CLASS CLASSIFICATION APPROACH
     # 20 Classes
@@ -148,6 +169,29 @@ if __name__ == "__main__":
                         masks_test=masks_test)
 
     compare_spot_rna_1d_classifier(BinClassifier,
+                                   num_classes=2,
+                                   spot_rna_gammas_train=spot_rna_gammas_train,
+                                   padded_sequences_train=padded_sequences_train,
+                                   masks_train=masks_train,
+                                   spot_rna_gammas_test=spot_rna_gammas_test,
+                                   padded_sequences_test=padded_sequences_test,
+                                   masks_test=masks_test,
+                                   )
+
+    # BINARY STATS CLASSIFICATION APPROACH
+    print("BINARY STATS CLASSIFICATION APPROACH")
+    BinStatsClassifier = torch.load("../models/BinStatsClassifier.pt")
+    angles = predict_angles(BinStatsClassifier,
+                            sequences=sequences_test,
+                            num_classes=2)
+
+    evaluate_classifier(BinStatsClassifier,
+                        num_classes=2,
+                        padded_sequences_test=padded_sequences_test,
+                        padded_gammas_test=padded_gammas_bin_stats_classes_test,
+                        masks_test=masks_test)
+
+    compare_spot_rna_1d_classifier(BinStatsClassifier,
                                    num_classes=2,
                                    spot_rna_gammas_train=spot_rna_gammas_train,
                                    padded_sequences_train=padded_sequences_train,
