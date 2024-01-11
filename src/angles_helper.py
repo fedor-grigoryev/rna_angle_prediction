@@ -80,7 +80,6 @@ class AngleHelper:
 
 
 if __name__ == "__main__":
-    # Example of usage
     in_path = os.path.join("data", "sample", "example.fasta")
     out_path = "sample.json"
 
