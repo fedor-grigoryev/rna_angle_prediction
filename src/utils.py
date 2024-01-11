@@ -128,6 +128,20 @@ def calculate_binary_index(angle):
     return class_index
 
 
+def calculate_tertiary_index(angle):
+    # Calculate the class index
+    if angle < 0:
+        angle += 360
+
+    if angle < 93.3:
+        class_index = 0
+    elif angle < 248.3:
+        class_index = 1
+    else:
+        class_index = 2
+
+    return class_index
+
 def convert_classes_to_angles(classes, num_classes):
     # Convert the classes the average angle in range
     return [min(class_index * 360/num_classes + 360/num_classes/2, 360 - class_index * 360/num_classes + 360/num_classes/2)
