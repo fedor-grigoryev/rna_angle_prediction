@@ -113,7 +113,17 @@ def calculate_class_index(angle, num_classes):
     if angle == 180:
         class_index -= 1
     return class_index
+def calculate_binary_index(angle):
+    # Calculate the class index
+    if angle < 0:
+        angle += 360
 
+    if angle < 93.3:
+        class_index = 0
+    else:
+        class_index = 1
+
+    return class_index
 
 def convert_classes_to_angles(classes, num_classes):
     # Convert the classes the average angle in range
