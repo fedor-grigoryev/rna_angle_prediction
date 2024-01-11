@@ -10,7 +10,8 @@ model2path = {
     # 'tertiary': ,
     '20': 'TwentyClassifier.pt',
     '30': 'ThirtyClassifier.pt',
-    'regression': 'Regressor.pt'
+    'regression': 'Regressor.pt',
+    'gmm': 'BinStatsClassifier.pt'
 }
 
 model2classes = {
@@ -18,8 +19,19 @@ model2classes = {
     # 'tertiary': ,
     '20': 20,
     '30': 30,
-    'regression': None
+    'regression': None,
+    'gmm': 2,
 }
+
+class_to_angle_mapping = {
+    0: 55.038,
+    1: 189.917,
+    # Add more mappings if needed for other classes
+}
+
+
+def class_to_angle_mapping_func(x):
+    return torch.tensor([class_to_angle_mapping[i.item()] for i in x])
 
 
 class AngleHelper:
@@ -67,7 +79,11 @@ class AngleHelper:
         outputs_masked = [out[tmask] for out, tmask in zip(outputs, tmasks)]
 
         if num_classes is not None:
-            outputs_masked = list(map(lambda class_index: class_index *
+            if model_type == 'gmm':
+                outputs_masked = list(
+                    map(lambda class_index: class_to_angle_mapping_func(class_index), outputs_masked))
+            else:
+                outputs_masked = list(map(lambda class_index: class_index *
                                       360/num_classes + 360/num_classes/2, outputs_masked))
 
         result_json = {}
