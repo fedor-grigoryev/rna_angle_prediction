@@ -45,7 +45,7 @@ ACGUUCU
 - `regression`: Regression model
 - `gmm`: GMM inferred binary classifier
 
-Example run:
+Example run, initiated from the `src` directory:
 
 ```bash
 python3 angles_helper.py \
@@ -55,3 +55,12 @@ python3 angles_helper.py \
 ```
 
 This example command initiates the `angles_helper` package, providing the necessary input parameters. Adjust the paths and model type based on your specific use case. The output will be stored in the specified JSON file.
+
+
+## How to get started with the models
+
+1. Navigate to rna_angles_prediction_dssr folder and run python dssr_wrapper.py
+
+2. Navigate to the root/src folder and run main.py
+
+3. Add modifications to main to test desirable functionality
