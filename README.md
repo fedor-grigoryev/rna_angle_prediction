@@ -1,6 +1,4 @@
-# RNA bioinformatics - M2-GENIOMHE project
-
-This repo is a wrapper around skeleton that was provided to us to start.
+# Bioinformatics of RNA course project
 
 ## Repository
 
